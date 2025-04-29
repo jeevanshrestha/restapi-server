@@ -1,13 +1,20 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
+import createHttpError, { HttpError } from 'http-errors'; 
+import globalErrorHandler from './middlewares/globalErrorHandler';
+
+import userRouter from './user/userRouter';
+
 const app = express();
 
-//Routes
+// Routes
+app.get('/', (req : Request, res : Response, next: NextFunction) => {
+    const error: HttpError = createHttpError(400, 'Something went wrong.');
+    next(error);
+});
 
-//HTTP methos: GET, POST, PUT , PATCH, DELETE
-app.get('/',(req, res, next)=>{
+app.use("/api/users",userRouter);
 
-    res.json({message: "Welcome to elib apis"});
-})
-
+// Global error handler
+app.use(globalErrorHandler);
 
 export default app;
