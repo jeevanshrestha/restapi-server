@@ -4,6 +4,7 @@ import globalErrorHandler from './middlewares/globalErrorHandler';
 import morgan from "morgan";
   
 import userRouter from './user/userRouter';
+import bookRouter from './book/bookRouter';
 import fs from 'fs';
 import path from 'path';
 
@@ -28,6 +29,7 @@ import path from 'path';
     });
 
     app.use("/api/users",userRouter);
+    app.use("/api/books", bookRouter);
 
     // Global error handler
     app.use(globalErrorHandler);
