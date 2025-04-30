@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { error } from "console";
 import userModel from "./userModel";
+import bcrypt from "bcrypt";
 
 export const createUser = async (
   request: Request,
@@ -30,6 +31,8 @@ export const createUser = async (
         return next(error);
     }
   // TODO: Add your business logic here
+  //hash the password
+  const hashed_password = await bcrypt.hash(password, 10)
 
   response.status(200).json({ message: "User Created Successfully." });
 };
