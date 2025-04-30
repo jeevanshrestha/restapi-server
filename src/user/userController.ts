@@ -1,26 +1,25 @@
 
-import { NextFunction, Request, Response } from "express";
-import createHttpError from "http-errors";
+ 
+import createHttpError from "http-errors"; 
+import { Request, Response, NextFunction } from 'express';
+import { validationResult } from 'express-validator';
+import { error } from "console";
 
+export const createUser = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+): Promise<void> => {
+  const errors = validationResult(request);
+  if (!errors.isEmpty()) {
 
-const createUser = async (request : Request, response: Response, next: NextFunction) => {
+     const error = createHttpError(400,  JSON.stringify(errors.array()))
+     return next(error);
+  }
 
-    //Retrieve data
-    const {name, email, password} = request.body;
-    //validation
+  const { name, email, password } = request.body;
 
-    if(!name || !email || !password){
+  // TODO: Add your business logic here
 
-        const error = createHttpError(400, "All fields are required")
-        return next(error);
-    }
-
-
-    //Process - business logic
-
-    //Response
-    response.status(200).json({message:"User Created Successfully."})
-
+  response.status(200).json({ message: "User Created Successfully." });
 };
-
-export {createUser}

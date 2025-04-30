@@ -5,7 +5,10 @@ import globalErrorHandler from './middlewares/globalErrorHandler';
 import userRouter from './user/userRouter';
 
 const app = express();
+//First Global middleware to parse Request body as json
 app.use(express.json());
+
+
 // Routes
 app.get('/', (req : Request, res : Response, next: NextFunction) => {
     const error: HttpError = createHttpError(400, 'Something went wrong.');
