@@ -11,7 +11,7 @@ export const validateBook = [
     .notEmpty().withMessage('coverImage is required'),
 
     body('file').trim()
-    .notEmpty().withMessage('File is required'),
+    .notEmpty().withMessage('File is required') ,
 
     body('genre').trim()
     .notEmpty().withMessage('Genre is required'),

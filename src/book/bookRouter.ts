@@ -9,18 +9,25 @@ import path from "node:path";
 
 const upload = multer({
     dest: path.resolve(__dirname, '../../public/data/uploads'),
-    limits:{fileSize: 3e7} // 30mb 30 * 1024 * 1024
+    limits:{fileSize: 1e7} // 10mb 30 * 1024 * 1024
 });
 
 const bookRouter = express.Router();
 
 bookRouter.post('/', validateBook ,upload.fields([
     {name:'coverImage', maxCount:1},
-    {name:'file', maxCount:1}
+    {name:'file', maxCount:1},
 ]),createBook);
+
 bookRouter.get('/',validateBook, getAllBooks);
+
 bookRouter.get('/:id', getBookById);
-bookRouter.put('/:id', updateBook);
+
+bookRouter.put('/:id', upload.fields([
+    {name:'coverImage', maxCount:1},
+    {name:'file', maxCount:1},
+]),updateBook);
+
 bookRouter.delete('/:id', deleteBook);
 
 export default bookRouter;
