@@ -5,9 +5,14 @@ import path from "node:path";
 import cloudinary from "../config/cloudinary";
 import createHttpError from "http-errors";
 import fs from "node:fs"; 
+import { AuthRequest } from "../middlewares/authenticate";
+
+
 
 export const  createBook =async (req : Request, res: Response, next: NextFunction) => {
-    console.log('files', req.files)
+ 
+    const _req = req as AuthRequest;
+    console.log('userId', _req.userId);
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } & { coverImage?: Express.Multer.File[] };
 
@@ -61,7 +66,7 @@ export const  createBook =async (req : Request, res: Response, next: NextFunctio
 
         const newBook = await Book.create({
             'title':req.body.title,
-            'author':'6811a6b07909b1dad6eb5654',
+            'author': _req.userId,
             'coverImage':uploadResult?.secure_url,
             'file':fileUploadResult?.secure_url,
              'genre':req.body.genre,
@@ -82,7 +87,12 @@ export const  createBook =async (req : Request, res: Response, next: NextFunctio
 
    }
 
+
 export const getAllBooks = async (req : Request, res: Response, next: NextFunction) => {
+
+ 
+    const _req = req as AuthRequest;
+    console.log('userId', _req.userId);
  
    try{
     const books =  await  Book.find(); 

@@ -1,10 +1,11 @@
-import express, { Router } from "express";
+import express, { RequestHandler, Router } from "express";
 
 import { createBook, getAllBooks , getBookById , updateBook, deleteBook} from "./bookController";
 import { validateUserRegiistration } from "../middlewares/validations/validateUserRegistration"; 
 import { validateBook } from "../middlewares/validations/validateBook";
 import multer from "multer";
 import path from "node:path";
+import authenticate from "../middlewares/authenticate";
 
 
 const upload = multer({
@@ -14,19 +15,19 @@ const upload = multer({
 
 const bookRouter = express.Router();
 
-bookRouter.post('/', validateBook ,upload.fields([
+bookRouter.post('/', validateBook ,authenticate , upload.fields([
     {name:'coverImage', maxCount:1},
     {name:'file', maxCount:1},
 ]),createBook);
 
-bookRouter.get('/',validateBook, getAllBooks);
+bookRouter.get('/', authenticate , getAllBooks);
 
 bookRouter.get('/:id', getBookById);
 
 bookRouter.put('/:id', upload.fields([
     {name:'coverImage', maxCount:1},
     {name:'file', maxCount:1},
-]),updateBook);
+]), validateBook, updateBook);
 
 bookRouter.delete('/:id', deleteBook);
 
