@@ -51,7 +51,7 @@ export const  createBook =async (req : Request, res: Response, next: NextFunctio
  
         const fileUploadResult =  await cloudinary.uploader
         .upload(pdfFile_filepath, {
-            resource_type:'raw',
+            access_mode: "public",
             filename_override: pdfFile_filename ,
             folder: 'book-pdfs',
             format: pdfFile_mimeType,
@@ -105,9 +105,9 @@ export const getAllBooks = async (req : Request, res: Response, next: NextFuncti
 
 } 
 export const getBookById =async (req : Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;;
+    const bookId = req.params.id.trim()
     try{
-        const book =  await  Book.findById(id);
+        const book =  await  Book.findOne({_id:bookId});
         if(!book){
 
             const error = createHttpError(404, "Book not found."  );
@@ -122,12 +122,52 @@ export const getBookById =async (req : Request, res: Response, next: NextFunctio
 
 
 } 
-export const updateBook =(req : Request, res: Response, next: NextFunction) => {
+export const updateBook =async (req : Request, res: Response, next: NextFunction) => {
 
+    const _req = req as AuthRequest;
+    console.log('userId', _req.userId);
+    const bookId = req.params.id.trim()
+    try{
+        const book =  await  Book.findOne({_id:bookId});
+        if(!book){
+
+            const error = createHttpError(404, "Book not found."  );
+            return next(error);
+        }
+
+        //check acess
+        if(book.author.toString() !== _req.userId) {
+
+            return next(createHttpError(403, "User not authorized to update book."));
+
+        }
+        
+        
+
+
+    
+       } catch(err:any){
+        const error = createHttpError(500, "Error fetching book.", err )
+        return next(error);
+       }
 
 } 
-export const deleteBook =(req : Request, res: Response, next: NextFunction) => {
-    //
-    const {} = req.body();
+export const deleteBook =async (req : Request, res: Response, next: NextFunction) => {
+    const {title, genre} = req.body;
+    const bookId = req.params.id.trim()
+    try{
+        const book =  await  Book.findOne({_id:bookId});
+        if(!book){
+
+            const error = createHttpError(404, "Book not found."  );
+            return next(error);
+        }
+        
+        //delete code
+    
+       } catch(err:any){
+        const error = createHttpError(500, "Error fetching book.", err )
+        return next(error);
+       }
 
 } 

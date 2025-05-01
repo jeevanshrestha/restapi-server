@@ -6,6 +6,7 @@ import { validateBook } from "../middlewares/validations/validateBook";
 import multer from "multer";
 import path from "node:path";
 import authenticate from "../middlewares/authenticate";
+import { validateBookEdit } from "../middlewares/validations/validateBookEdit";
 
 
 const upload = multer({
@@ -22,13 +23,13 @@ bookRouter.post('/', validateBook ,authenticate , upload.fields([
 
 bookRouter.get('/', authenticate , getAllBooks);
 
-bookRouter.get('/:id', getBookById);
+bookRouter.get('/:id', authenticate, getBookById);
 
-bookRouter.put('/:id', upload.fields([
+bookRouter.patch('/:id', authenticate, upload.fields([
     {name:'coverImage', maxCount:1},
     {name:'file', maxCount:1},
-]), validateBook, updateBook);
+]),  validateBookEdit,  updateBook);
 
-bookRouter.delete('/:id', deleteBook);
+bookRouter.delete('/:id',authenticate,  deleteBook);
 
 export default bookRouter;
