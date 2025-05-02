@@ -8,14 +8,14 @@ import fs from "node:fs";
 import { AuthRequest } from "../middlewares/authenticate";
 import mongoose from "mongoose";
 import bookModel from "./bookModel";
+import { UploadApiResponse } from "cloudinary";
+import { raw } from "body-parser";
 
 
 
 export const  createBook =async (req : Request, res: Response, next: NextFunction) => {
  
-    const _req = req as AuthRequest;
-    console.log('userId', _req.userId);
-
+    const _req = req as AuthRequest; 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } & { coverImage?: Express.Multer.File[] };
 
     //Handle Cover Image
@@ -68,18 +68,17 @@ export const  createBook =async (req : Request, res: Response, next: NextFunctio
 
         try{
             const newBook = await Book.create({
-                'title':req.body.title,
+                'title': req.body.title,
                 'author': _req.userId,
-                'coverImage':uploadResult.secure_url,
-                'file':fileUploadResult.secure_url,
-                 'genre':req.body.genre,
-            })
+                'coverImage': (uploadResult as UploadApiResponse).secure_url,
+                'file': (fileUploadResult as UploadApiResponse).secure_url,
+                'genre': req.body.genre,
+            });
 
             await fs.promises.unlink(coverImage_filepath);
             await fs.promises.unlink(pdfFile_filepath);
 
-            
-            res.status(200).json({id:newBook.id})
+            res.status(200).json({ id: newBook.id });
 
         }catch(err:any)
         { 
@@ -93,8 +92,7 @@ export const  createBook =async (req : Request, res: Response, next: NextFunctio
 export const getAllBooks = async (req : Request, res: Response, next: NextFunction) => {
 
  
-    const _req = req as AuthRequest;
-    console.log('userId', _req.userId);
+    const _req = req as AuthRequest; 
  
    try{
     //add pagination
@@ -127,8 +125,7 @@ export const getBookById =async (req : Request, res: Response, next: NextFunctio
 } 
 export const updateBook =async (req : Request, res: Response, next: NextFunction) => {
 
-    const _req = req as AuthRequest;
-    console.log('userId', _req.userId);
+    const _req = req as AuthRequest; 
     const bookId = req.params.id.trim()
     let book;
     try{
@@ -208,8 +205,8 @@ export const updateBook =async (req : Request, res: Response, next: NextFunction
         const updatedBook = await Book.findOneAndUpdate({ _id: bookId }, {
             title: req.body.title,
             genre: req.body.genre,
-            'coverImage': files.coverImage ? uploadResult.secure_url : book.coverImage,
-            'file': files.file ? fileUploadResult.secure_url : book.file,
+            'coverImage': files.coverImage ? (uploadResult as UploadApiResponse).secure_url : book.coverImage,
+            'file': files.file ? (fileUploadResult as UploadApiResponse).secure_url : book.file,
         });
 
         res.json(updatedBook);
@@ -242,14 +239,15 @@ export const deleteBook =async (req : Request, res: Response, next: NextFunction
 
         const coverImageSplits = book.coverImage?.split('/');
         const coverImagePublicId = coverImageSplits?.at(-2)+'/'+ coverImageSplits?.at(-1)?.split('.').at(-2);
-        console.log(coverImageSplits.at(-2))
-
+ 
         const bookFileSplits = book.file?.split('/');
         const bookFilePublicId = bookFileSplits?.at(-2)+'/'+ bookFileSplits?.at(-1);
-        console.log(bookFilePublicId.at(-2))
-
+ 
         await cloudinary.uploader.destroy(coverImagePublicId);
-        await cloudinary.uploader.destroy(bookFilePublicId);
+        await cloudinary.uploader.destroy(bookFilePublicId, {
+            resource_type:'raw',
+            invalidate:true,
+        });
 
         await bookModel.deleteOne({_id: bookId});
 
